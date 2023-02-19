@@ -14,7 +14,7 @@ type Repository interface {
 	GetUsers() ([]model.User, error)
 	GetOneUser(id int) (model.User, error)
 	UpdateUser(id int, updatedInfo model.User) error
-	GetSkills(minFreq *int, maxFreq *int) ([]model.SkillRating, error)
+	GetSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error)
 }
 
 func serve(repo Repository) {
@@ -32,7 +32,7 @@ func registerRoutes(r *gin.Engine, repo Repository) {
 	r.GET("/users", getUsers(repo))
 	r.GET("/users/:id", getOneUser(repo))
 	r.PUT("/users/:id", updateUser(repo))
-	r.GET("/skills", getSkills(repo))
+	r.GET("/skills/", getSkills(repo))
 }
 
 func getUsers(repo Repository) gin.HandlerFunc {
@@ -87,15 +87,16 @@ func getSkills(repo Repository) gin.HandlerFunc {
 		var (
 			minFreq *int
 			maxFreq *int
+			err     error
 		)
 
 		if minFreqParam, ok := c.GetQuery("min_frequency"); ok {
-			if strConv(minFreqParam, minFreq) != nil {
+			if minFreq, err = strConv(minFreqParam); err != nil {
 				c.Status(http.StatusNotFound)
 			}
 		}
 		if maxFreqParam, ok := c.GetQuery("max_frequency"); ok {
-			if strConv(maxFreqParam, maxFreq) != nil {
+			if maxFreq, err = strConv(maxFreqParam); err != nil {
 				c.Status(http.StatusNotFound)
 			}
 		}
@@ -108,11 +109,10 @@ func getSkills(repo Repository) gin.HandlerFunc {
 	}
 }
 
-func strConv(s string, res *int) error {
+func strConv(s string) (*int, error) {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	*res = i
-	return nil
+	return &i, nil
 }

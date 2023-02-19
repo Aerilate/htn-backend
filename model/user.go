@@ -14,3 +14,8 @@ type SkillRating struct {
 	Skill  string `gorm:"primaryKey" json:"skill"`
 	Rating int    `json:"rating"`
 }
+
+type SkillAggregate struct {
+	Skill string
+	Count int
+}

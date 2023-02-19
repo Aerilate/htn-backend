@@ -8,10 +8,10 @@ import (
 )
 
 type UserInserter interface {
-	InsertUsers(users []model.User) error 
+	InsertUsers(users []model.User) error
 }
 
-func insertMockData(filename string, userInserter UserInserter ) error {
+func insertMockData(filename string, userInserter UserInserter) error {
 	var users []model.User
 	users, err := processfile(filename)
 	if err != nil {
@@ -33,4 +33,3 @@ func processfile(filename string) ([]model.User, error) {
 	json.Unmarshal([]byte(data), &users)
 	return users, nil
 }
-

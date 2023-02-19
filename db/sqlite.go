@@ -1,12 +1,12 @@
 package db
 
 import (
-	"errors"
-
 	"github.com/Aerilate/htn-backend/model"
 	"github.com/imdario/mergo"
 	"gorm.io/gorm"
 )
+
+const MaxInt = int(^uint(0) >> 1)
 
 type DB struct {
 	db *gorm.DB
@@ -74,6 +74,26 @@ func (db DB) UpdateUser(id int, updatedInfo model.User) error {
 	return nil
 }
 
-func (db DB) GetSkills(minFreq *int, maxFreq *int) ([]model.SkillRating, error) {
-	return nil, errors.New("not implemented")
+func (db DB) GetSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error) {
+	if minFreq == nil {
+		minFreq = IntPtr(0)
+	}
+	if maxFreq == nil {
+		maxFreq = IntPtr(MaxInt)
+	}
+
+	var result []model.SkillAggregate
+	if err := db.db.Model(&model.SkillRating{}).
+		Select("skill, count(*) as count").
+		Group("skill").
+		Having("count BETWEEN ? AND ?", *minFreq, *maxFreq).
+		Order("count DESC").
+		Find(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func IntPtr(i int) *int {
+	return &i
 }
