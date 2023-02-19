@@ -1,25 +1,28 @@
 package db
 
 import (
+	// "database/sql"
 	"errors"
+
 	"github.com/Aerilate/htn-backend/model"
 	mapset "github.com/deckarep/golang-set/v2"
 	// "github.com/mattn/go-sqlite3"
 	// "gorm.io/driver/sqlite"
-	// "gorm.io/gorm"
+  	"gorm.io/gorm"
 )
 
 type DB struct {
-	Users []model.User
-	// conn *DB
+	db *gorm.DB
 }
 
-func init() {
-	// db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+func NewDB(db *gorm.DB) DB {
+	return DB {
+		db: db,
+	}
 }
 
 func (db DB) GetUsers() ([]model.User, error) {
-	return db.Users, nil
+	return nil, nil
 }
 
 func (DB) GetOneUser(id int) (model.User, error) {

@@ -1,6 +1,7 @@
 package model
 
 type User struct {
+	ID		int
 	Name    string
 	Company string
 	Email   string
@@ -9,6 +10,7 @@ type User struct {
 }
 
 type SkillRating struct {
+	ID		int
 	Skill  string
 	Rating int
 }
