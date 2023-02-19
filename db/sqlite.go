@@ -28,7 +28,7 @@ func (db DB) InsertUsers(users []model.User) error {
 
 func (db DB) GetUsers() ([]model.User, error) {
 	var users []model.User
-	tx := db.db.Joins("JOIN skill_ratings on skill_ratings.user_id = users.id").
+	tx := db.db.Joins("LEFT JOIN skill_ratings on skill_ratings.user_id = users.id").
 		Group("users.id").
 		Preload("SkillRating").
 		Find(&users)
