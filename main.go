@@ -32,6 +32,7 @@ func run() error {
 	if err := db.RunMigration(conn, SQLITE_FILE); err != nil {
 		return err
 	}
+	conn.Close()
 
 	orm, err := gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{})
 	if err != nil {

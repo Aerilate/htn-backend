@@ -1,0 +1,10 @@
+version: "3"
+services:
+  api:
+    container_name: htn-backend
+    build:
+      context: .
+    environment:
+      - GIN_MODE=release
+    ports:
+      - 8080:8080
