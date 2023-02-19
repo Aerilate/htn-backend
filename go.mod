@@ -6,6 +6,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.1.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/imdario/mergo v0.3.12
 	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v1.14.15
 	gorm.io/gorm v1.24.0

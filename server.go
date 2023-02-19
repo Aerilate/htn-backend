@@ -7,14 +7,13 @@ import (
 	"strconv"
 
 	"github.com/Aerilate/htn-backend/model"
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 )
 
 type Repository interface {
 	GetUsers() ([]model.User, error)
 	GetOneUser(id int) (model.User, error)
-	UpdateUser(id int, updatedInfo model.User, keysToUpdate mapset.Set[string]) error
+	UpdateUser(id int, updatedInfo model.User) error
 	GetSkills(minFreq *int, maxFreq *int) ([]model.SkillRating, error)
 }
 
@@ -76,29 +75,11 @@ func updateUser(repo Repository) gin.HandlerFunc {
 		if err := json.Unmarshal(data, &updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
 		}
-		keysToUpdate, err := listNonEmptyJSONKeys(data)
-		if err != nil {
-			c.Status(http.StatusBadRequest)
-		}
-
-		if err := repo.UpdateUser(id, updatedInfo, keysToUpdate); err != nil {
+		if err := repo.UpdateUser(id, updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
 		}
 		c.Status(http.StatusOK)
 	}
-}
-
-func listNonEmptyJSONKeys(data []byte) (mapset.Set[string], error) {
-	var fields map[string]json.RawMessage
-	err := json.Unmarshal(data, &fields)
-	if err != nil {
-		return nil, err
-	}
-	set := mapset.NewSet[string]()
-	for k := range fields {
-		set.Add(k)
-	}
-	return set, nil
 }
 
 func getSkills(repo Repository) gin.HandlerFunc {
