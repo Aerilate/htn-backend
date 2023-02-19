@@ -28,18 +28,21 @@ func (db DB) InsertUsers(users []model.User) error {
 
 func (db DB) GetUsers() ([]model.User, error) {
 	var users []model.User
-	tx := db.db.Joins("LEFT JOIN skill_ratings on skill_ratings.user_id = users.id").
+	if err := db.db.Joins("LEFT JOIN skill_ratings on skill_ratings.user_id = users.id").
 		Group("users.id").
 		Preload("SkillRating").
-		Find(&users)
-	if err := tx.Error; err != nil {
+		Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
-func (DB) GetOneUser(id int) (model.User, error) {
-	return model.User{}, errors.New("not implemented")
+func (db DB) GetOneUser(id int) (model.User, error) {
+	var user model.User
+	if err := db.db.First(&user, id).Error; err != nil {
+		return model.User{}, err
+	}
+	return user, nil
 }
 
 func (DB) UpdateUser(id int, updatedInfo model.User, keysToUpdate mapset.Set[string]) error {
