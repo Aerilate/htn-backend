@@ -8,11 +8,11 @@ import (
 )
 
 func processfile(filename string) ([]model.User, error) {
-    data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var users []model.User
 	json.Unmarshal([]byte(data), &users)
 	return users, nil

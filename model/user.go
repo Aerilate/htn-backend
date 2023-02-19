@@ -1,14 +1,14 @@
 package model
 
 type User struct {
-	Name string
+	Name    string
 	Company string
-	Email string
-	Phone string
-	Skills []SkillRating
+	Email   string
+	Phone   string
+	Skills  []SkillRating
 }
 
 type SkillRating struct {
-	Skill string
+	Skill  string
 	Rating int
 }
