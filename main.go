@@ -2,13 +2,13 @@ package main
 
 import (
 	"database/sql"
-	// "fmt"
+	"flag"
 	"log"
 
 	"github.com/Aerilate/htn-backend/db"
 	_ "github.com/mattn/go-sqlite3"
-	// "gorm.io/driver/sqlite"
-	// "gorm.io/gorm"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 const DATA_FILE = "HTN_2023_BE_Challenge_Data.json"
@@ -22,6 +22,9 @@ func main() {
 }
 
 func run() error {
+	var insertData = flag.Bool("i", false, "insert mock data?")
+	flag.Parse()
+
 	conn, err := sql.Open("sqlite3", SQLITE_FILE)
 	if err != nil {
 		return err
@@ -30,11 +33,18 @@ func run() error {
 		return err
 	}
 
-	// conn, err := gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{})
-	// if err != nil {
-	// 	return err
-	// }
-
-	// serve(db.NewDB(conn))
+	orm, err := gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{})
+	if err != nil {
+		return err
+	}
+	newDB := db.NewDB(orm)
+	if *insertData {
+		log.Println("Inserting mock data...")
+		if err := insertMockData(DATA_FILE, newDB); err != nil {
+			return err
+		}
+		log.Println("...done inserting mock data")
+	}
+	serve(newDB)
 	return nil
 }

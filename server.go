@@ -20,6 +20,7 @@ type Repository interface {
 
 func serve(repo Repository) {
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
 	registerRoutes(r, repo)
 	r.Run()
 }

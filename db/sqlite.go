@@ -1,14 +1,11 @@
 package db
 
 import (
-	// "database/sql"
 	"errors"
 
 	"github.com/Aerilate/htn-backend/model"
 	mapset "github.com/deckarep/golang-set/v2"
-	// "github.com/mattn/go-sqlite3"
-	// "gorm.io/driver/sqlite"
-  	"gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 type DB struct {
@@ -16,13 +13,29 @@ type DB struct {
 }
 
 func NewDB(db *gorm.DB) DB {
-	return DB {
+	return DB{
 		db: db,
 	}
 }
 
+func (db DB) InsertUsers(users []model.User) error {
+	tx := db.db.Create(&users)
+	if err := tx.Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (db DB) GetUsers() ([]model.User, error) {
-	return nil, nil
+	var users []model.User
+	tx := db.db.Joins("JOIN skill_ratings on skill_ratings.user_id = users.id").
+		Group("users.id").
+		Preload("SkillRating").
+		Find(&users)
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (DB) GetOneUser(id int) (model.User, error) {

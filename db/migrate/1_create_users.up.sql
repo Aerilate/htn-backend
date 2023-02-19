@@ -6,10 +6,10 @@ CREATE TABLE IF NOT EXISTS users(
 	phone TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS skills(
-	id INTEGER,
+CREATE TABLE IF NOT EXISTS skill_ratings(
+	user_id INTEGER,
 	skill TEXT NOT NULL,
 	rating INTEGER NOT NULL,
-	PRIMARY KEY(id, skill),
-	FOREIGN KEY(id) REFERENCES users(id)
+	PRIMARY KEY(user_id, skill),
+	FOREIGN KEY(user_id) REFERENCES users(id)
 );
