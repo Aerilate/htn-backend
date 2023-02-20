@@ -60,5 +60,5 @@ func getMigrationPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return path + MigrationPath, nil
+	return path + "/" + MigrationPath, nil
 }
