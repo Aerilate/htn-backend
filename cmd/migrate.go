@@ -1,17 +1,40 @@
-package db
+package cmd
 
 import (
 	"database/sql"
+	"log"
+	"os"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
-	"os"
+	"github.com/spf13/cobra"
 )
 
-const MIGRATION_PATH = "/db/migrate"
+func init() {
+	rootCmd.AddCommand(migrateCmd)
+}
 
-func RunMigration(db *sql.DB, dbName string) error {
+var migrateCmd = &cobra.Command{
+	Use:   "migrate",
+	Short: "Run data migrations on the database",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.Println("Running migrations...")
+		if err := runMigration(DBName, SQLitePath); err != nil {
+			log.Fatal(err)
+		}
+		log.Println("...done migrations")
+	},
+}
+
+func runMigration(dbName string, sqlFile string) error {
+	db, err := sql.Open("sqlite3", sqlFile)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
 	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
 	if err != nil {
 		return err
@@ -37,5 +60,5 @@ func getMigrationPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return path + MIGRATION_PATH, nil
+	return path + MigrationPath, nil
 }

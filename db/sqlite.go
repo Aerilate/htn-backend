@@ -8,24 +8,24 @@ import (
 
 const MaxInt = int(^uint(0) >> 1)
 
-type DB struct {
+type SQLiteRepository struct {
 	db *gorm.DB
 }
 
-func NewDB(db *gorm.DB) DB {
-	return DB{
+func NewSQLiteRepository(db *gorm.DB) SQLiteRepository {
+	return SQLiteRepository{
 		db: db,
 	}
 }
 
-func (db DB) InsertUsers(users []model.User) error {
+func (db SQLiteRepository) InsertUsers(users []model.User) error {
 	if err := db.db.Create(&users).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (db DB) GetUsers() ([]model.User, error) {
+func (db SQLiteRepository) GetUsers() ([]model.User, error) {
 	var users []model.User
 	if err := db.db.Joins("LEFT JOIN skill_ratings on skill_ratings.user_id = users.id").
 		Group("users.id").
@@ -36,7 +36,7 @@ func (db DB) GetUsers() ([]model.User, error) {
 	return users, nil
 }
 
-func (db DB) GetOneUser(id int) (model.User, error) {
+func (db SQLiteRepository) GetOneUser(id int) (model.User, error) {
 	var user model.User
 	if err := db.db.Joins("LEFT JOIN skill_ratings on skill_ratings.user_id = users.id").
 		Group("users.id").
@@ -47,7 +47,7 @@ func (db DB) GetOneUser(id int) (model.User, error) {
 	return user, nil
 }
 
-func (db DB) UpdateUser(id int, updatedInfo model.User) error {
+func (db SQLiteRepository) UpdateUser(id int, updatedInfo model.User) error {
 	var userToUpdate model.User
 	if err := db.db.First(&userToUpdate, id).Error; err != nil {
 		return err
@@ -74,12 +74,12 @@ func (db DB) UpdateUser(id int, updatedInfo model.User) error {
 	return nil
 }
 
-func (db DB) GetSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error) {
+func (db SQLiteRepository) GetSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error) {
 	if minFreq == nil {
-		minFreq = IntPtr(0)
+		minFreq = intPtr(0)
 	}
 	if maxFreq == nil {
-		maxFreq = IntPtr(MaxInt)
+		maxFreq = intPtr(MaxInt)
 	}
 
 	var result []model.SkillAggregate
@@ -94,6 +94,6 @@ func (db DB) GetSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, erro
 	return result, nil
 }
 
-func IntPtr(i int) *int {
+func intPtr(i int) *int {
 	return &i
 }
