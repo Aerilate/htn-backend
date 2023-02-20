@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/Aerilate/htn-backend/db"
 	"github.com/Aerilate/htn-backend/model"
+	"github.com/Aerilate/htn-backend/repository"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"gorm.io/driver/sqlite"
@@ -17,7 +17,13 @@ var inputFile string
 
 func init() {
 	rootCmd.AddCommand(populateCmd)
-	populateCmd.Flags().StringVarP(&inputFile, "inputfile", "i", DefaultInputFile, "JSON file of users to populate the database")
+	populateCmd.Flags().StringVarP(
+		&inputFile,
+		"inputfile",
+		"i",
+		DefaultInputFile,
+		"JSON file of users to populate the database",
+	)
 }
 
 var populateCmd = &cobra.Command{
@@ -32,9 +38,9 @@ var populateCmd = &cobra.Command{
 	},
 }
 
-func populate(usersFile string, sqlFile string) error {
+func populate(inputFile string, sqlFile string) error {
 	var users []model.User
-	users, err := processfile(usersFile)
+	users, err := processUsersJSON(inputFile)
 	if err != nil {
 		return err
 	}
@@ -43,15 +49,15 @@ func populate(usersFile string, sqlFile string) error {
 	if err != nil {
 		return err
 	}
-	newDB := db.NewSQLiteRepository(conn)
+	newDB := repository.NewRepo(conn)
 	if err := newDB.InsertUsers(users); err != nil {
 		return err
 	}
 	return nil
 }
 
-func processfile(filename string) ([]model.User, error) {
-	data, err := os.ReadFile(filename)
+func processUsersJSON(inputFile string) ([]model.User, error) {
+	data, err := os.ReadFile(inputFile)
 	if err != nil {
 		return nil, err
 	}

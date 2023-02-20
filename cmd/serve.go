@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Aerilate/htn-backend/db"
 	"github.com/Aerilate/htn-backend/model"
+	"github.com/Aerilate/htn-backend/repository"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -24,43 +24,61 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the server",
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := gorm.Open(sqlite.Open(SQLitePath), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(SQLitePath), &gorm.Config{})
 		if err != nil {
 			log.Fatal(err)
 		}
-		newDB := db.NewSQLiteRepository(conn)
-		serve(newDB)
+		repository := repository.NewRepo(db)
+		server := NewServer(repository)
+		server.serve()
 	},
 }
 
+type Server struct {
+	gin  *gin.Engine
+	repo Repository
+}
+
 type Repository interface {
-	GetUsers() ([]model.User, error)
-	GetOneUser(id int) (model.User, error)
+	UserRepository
+	SkillRatingRepository
+}
+
+type UserRepository interface {
+	InsertUsers(users []model.User) error
+	GetAllUsers() ([]model.User, error)
+	GetUser(id int) (model.User, error)
 	UpdateUser(id int, updatedInfo model.User) error
-	GetSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error)
 }
 
-func serve(repo Repository) {
-	r := gin.Default()
-	r.SetTrustedProxies(nil)
-	registerRoutes(r, repo)
-	r.Run()
+type SkillRatingRepository interface {
+	AggregateSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error)
 }
 
-func registerRoutes(r *gin.Engine, repo Repository) {
-	r.GET("/health", func(c *gin.Context) {
+func NewServer(r Repository) Server {
+	return Server{gin.Default(), r}
+}
+
+func (s Server) serve() {
+	s.gin.SetTrustedProxies(nil)
+	s.registerRoutes()
+	s.gin.Run()
+}
+
+func (s Server) registerRoutes() {
+	s.gin.GET("/health", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
 
-	r.GET("/users", getUsers(repo))
-	r.GET("/users/:id", getOneUser(repo))
-	r.PUT("/users/:id", updateUser(repo))
-	r.GET("/skills/", getSkills(repo))
+	s.gin.GET("/users", s.getUsers())
+	s.gin.GET("/users/:id", s.getOneUser())
+	s.gin.PUT("/users/:id", s.updateUser())
+	s.gin.GET("/skills/", s.getSkills())
 }
 
-func getUsers(repo Repository) gin.HandlerFunc {
+func (s Server) getUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		users, err := repo.GetUsers()
+		users, err := s.repo.GetAllUsers()
 		if err != nil {
 			c.Status(http.StatusNotFound)
 		}
@@ -68,13 +86,13 @@ func getUsers(repo Repository) gin.HandlerFunc {
 	}
 }
 
-func getOneUser(repo Repository) gin.HandlerFunc {
+func (s Server) getOneUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.Status(http.StatusNotFound)
 		}
-		user, err := repo.GetOneUser(id)
+		user, err := s.repo.GetUser(id)
 		if err != nil {
 			c.Status(http.StatusNotFound)
 		}
@@ -82,7 +100,7 @@ func getOneUser(repo Repository) gin.HandlerFunc {
 	}
 }
 
-func updateUser(repo Repository) gin.HandlerFunc {
+func (s Server) updateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// validate id parameter
 		id, err := strconv.Atoi(c.Param("id"))
@@ -98,14 +116,14 @@ func updateUser(repo Repository) gin.HandlerFunc {
 		if err := json.Unmarshal(data, &updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
 		}
-		if err := repo.UpdateUser(id, updatedInfo); err != nil {
+		if err := s.repo.UpdateUser(id, updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
 		}
 		c.Status(http.StatusOK)
 	}
 }
 
-func getSkills(repo Repository) gin.HandlerFunc {
+func (s Server) getSkills() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			minFreq *int
@@ -124,7 +142,7 @@ func getSkills(repo Repository) gin.HandlerFunc {
 			}
 		}
 
-		skills, err := repo.GetSkills(minFreq, maxFreq)
+		skills, err := s.repo.AggregateSkills(minFreq, maxFreq)
 		if err != nil {
 			c.Status(http.StatusNotFound)
 		}
