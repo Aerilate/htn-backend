@@ -21,14 +21,14 @@ var migrateCmd = &cobra.Command{
 	Short: "Run data migrations on the database",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("Running migrations...")
-		if err := runMigration(DBName, SQLitePath); err != nil {
+		if err := runMigration(SQLitePath, DBName); err != nil {
 			log.Fatal(err)
 		}
 		log.Println("...done migrations")
 	},
 }
 
-func runMigration(dbName string, sqlFile string) error {
+func runMigration(sqlFile string, dbName string) error {
 	db, err := sql.Open("sqlite3", sqlFile)
 	if err != nil {
 		return err

@@ -13,6 +13,9 @@ FROM alpine
 WORKDIR /app/
 
 COPY --from=builder /src/app ./
-COPY db/migrate ./db/migrate
+COPY migration migration/
 COPY *.json ./
-CMD ["./app", "-i"]
+
+RUN ./app migrate
+RUN ./app populate
+CMD ["./app", "serve"]
