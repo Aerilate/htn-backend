@@ -43,12 +43,22 @@ pong
 ```bash
 # this builds the first stage only
 $ docker build . --target builder
-...
+... # some Docker build output
 => => writing image sha256:2de14607582f75261f0580ac906e3fdc9675451fbdfc29745b673163aebf0dad       0.0s
 ,,,
 
 # run the image from the previous step
 $ docker run sha256:2de146
+?       github.com/Aerilate/htn-backend [no test files]
+ok      github.com/Aerilate/htn-backend/cmd     0.010s
+?       github.com/Aerilate/htn-backend/model   [no test files]
+?       github.com/Aerilate/htn-backend/repository      [no test files]
+```
+
+Alternatively, in one command:
+```bash
+# please be patient!
+$ docker run $(docker build . --target builder -q)
 ?       github.com/Aerilate/htn-backend [no test files]
 ok      github.com/Aerilate/htn-backend/cmd     0.010s
 ?       github.com/Aerilate/htn-backend/model   [no test files]
