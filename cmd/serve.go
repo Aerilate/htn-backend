@@ -30,12 +30,12 @@ var serveCmd = &cobra.Command{
 		}
 		repository := repository.NewRepo(db)
 		server := NewServer(repository)
-		server.serve()
+		server.Run()
 	},
 }
 
 type Server struct {
-	gin  *gin.Engine
+	*gin.Engine
 	repo Repository
 }
 
@@ -55,25 +55,23 @@ type SkillRatingRepository interface {
 	AggregateSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error)
 }
 
-func NewServer(r Repository) Server {
-	return Server{gin.Default(), r}
-}
-
-func (s Server) serve() {
-	s.gin.SetTrustedProxies(nil)
-	s.registerRoutes()
-	s.gin.Run()
+func NewServer(repo Repository) Server {
+	g := gin.Default()
+	g.SetTrustedProxies(nil)
+	server := Server{g, repo}
+	server.registerRoutes()
+	return server
 }
 
 func (s Server) registerRoutes() {
-	s.gin.GET("/health", func(c *gin.Context) {
-		c.Status(http.StatusOK)
+	s.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
 	})
 
-	s.gin.GET("/users", s.getUsers())
-	s.gin.GET("/users/:id", s.getOneUser())
-	s.gin.PUT("/users/:id", s.updateUser())
-	s.gin.GET("/skills/", s.getSkills())
+	s.GET("/users", s.getUsers())
+	s.GET("/users/:id", s.getOneUser())
+	s.PUT("/users/:id", s.updateUser())
+	s.GET("/skills/", s.getSkills())
 }
 
 func (s Server) getUsers() gin.HandlerFunc {
