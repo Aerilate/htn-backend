@@ -24,11 +24,15 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the server",
 	Run: func(cmd *cobra.Command, args []string) {
+		// set up the ORM
 		db, err := gorm.Open(sqlite.Open(SQLitePath), &gorm.Config{})
 		if err != nil {
 			log.Fatal(err)
 		}
+		// initialize our repository struct to interact with the DB
 		repository := repository.NewRepo(db)
+
+		// run the server
 		server := NewServer(repository)
 		server.Run()
 	},
@@ -39,11 +43,13 @@ type Server struct {
 	repo Repository
 }
 
+// Repository is an interface of all the functions our server needs to handle data
 type Repository interface {
 	UserRepository
 	SkillRatingRepository
 }
 
+// UserRepository lists the functions the server needs to handle user info
 type UserRepository interface {
 	InsertUsers(users []model.User) error
 	GetAllUsers() ([]model.User, error)
@@ -51,6 +57,7 @@ type UserRepository interface {
 	UpdateUser(id int, updatedInfo model.User) error
 }
 
+// SkillRatingRepository lists the functions the server needs to handle skill info
 type SkillRatingRepository interface {
 	AggregateSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error)
 }
@@ -67,7 +74,6 @@ func (s Server) registerRoutes() {
 	s.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
-
 	s.GET("/users/", s.getUsers())
 	s.GET("/users/:id", s.getOneUser())
 	s.PUT("/users/:id", s.updateUser())
@@ -87,6 +93,7 @@ func (s Server) getUsers() gin.HandlerFunc {
 
 func (s Server) getOneUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// parse ID parameter into int
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.Status(http.StatusBadRequest)
@@ -103,18 +110,20 @@ func (s Server) getOneUser() gin.HandlerFunc {
 
 func (s Server) updateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// validate id parameter
+		// parse ID parameter into int
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.Status(http.StatusBadRequest)
 			return
 		}
 
+		// read the request body
 		data, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
 			c.Status(http.StatusBadRequest)
 			return
 		}
+		// unmarshal the request body into a User struct
 		var updatedInfo model.User
 		if err := json.Unmarshal(data, &updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
@@ -136,6 +145,7 @@ func (s Server) getSkills() gin.HandlerFunc {
 			err     error
 		)
 
+		// parse min_frequency and max_frequency parameters into int, if they exist
 		if minFreqParam, ok := c.GetQuery("min_frequency"); ok {
 			if minFreq, err = strConv(minFreqParam); err != nil {
 				c.Status(http.StatusBadRequest)
@@ -158,6 +168,7 @@ func (s Server) getSkills() gin.HandlerFunc {
 	}
 }
 
+// strConv converts s into an int and returns a pointer to that int value
 func strConv(s string) (*int, error) {
 	i, err := strconv.Atoi(s)
 	if err != nil {

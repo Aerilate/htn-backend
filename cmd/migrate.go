@@ -28,18 +28,23 @@ var migrateCmd = &cobra.Command{
 	},
 }
 
+// runMigration runs migration scripts on a given SQLite file.
 func runMigration(sqlFile string, dbName string) error {
+	// open a DB connection
 	db, err := sql.Open("sqlite3", sqlFile)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
-	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+	// get path of the migration scripts
+	path, err := getMigrationPath()
 	if err != nil {
 		return err
 	}
-	path, err := getMigrationPath()
+
+	// setup golang-migrate library
+	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
 	if err != nil {
 		return err
 	}
@@ -49,6 +54,7 @@ func runMigration(sqlFile string, dbName string) error {
 	if err != nil {
 		return err
 	}
+	// run the migration
 	if err := m.Up(); err != migrate.ErrNoChange {
 		return err
 	}

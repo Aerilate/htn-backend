@@ -27,7 +27,7 @@ The main libraries used are:
 Requirements:
 * Git
 * Docker
-(Go is not required)
+Note: Go is not required for setup and this guide does NOT assume you have it installed.
 
 ### Clone
 ```bash
@@ -36,38 +36,14 @@ $ git clone git@github.com:Aerilate/htn-backend.git
 
 ### Basic Usage
 ```bash
+# in one command, sets up the database and runs the server
 $ docker compose up
 
 $ curl localhost:8080/ping
 pong
+
+# now try the examples in the API section below!
 ```
-
-### Running Tests
-```bash
-# this builds the first stage only
-$ docker build . --target builder
-... # some Docker build output
-=> => writing image sha256:2de14607582f75261f0580ac906e3fdc9675451fbdfc29745b673163aebf0dad       0.0s
-,,,
-
-# run the image from the previous step
-$ docker run sha256:2de146
-?       github.com/Aerilate/htn-backend [no test files]
-ok      github.com/Aerilate/htn-backend/cmd     0.010s
-?       github.com/Aerilate/htn-backend/model   [no test files]
-?       github.com/Aerilate/htn-backend/repository      [no test files]
-```
-
-Alternatively, in one command:
-```bash
-# please be patient!
-$ docker run $(docker build . --target builder -q)
-?       github.com/Aerilate/htn-backend [no test files]
-ok      github.com/Aerilate/htn-backend/cmd     0.010s
-?       github.com/Aerilate/htn-backend/model   [no test files]
-?       github.com/Aerilate/htn-backend/repository      [no test files]
-```
-
 
 ## API
 ### GET /users/
@@ -208,4 +184,48 @@ $ curl "localhost:8080/skills/?min_frequency=40"
 
 $ curl "localhost:8080/skills/?min_frequency=19&max_frequency=21"
 [{"skill":"Matplotlib","count":21},{"skill":"Aurelia","count":21},{"skill":"Starlette","count":20},{"skill":"Pascal","count":20},{"skill":"Numpy","count":20},{"skill":"Lisp","count":20},{"skill":"Tachyons","count":19}]
+```
+
+### Running Tests
+```bash
+# make sure to stop previous containers (i.e. CTRL+C out of docker compose up)
+
+# this builds the first stage only and will be our dev container. expect some build output
+$ docker build . --target builder
+...
+=> => writing image sha256:<somehashabc>       0.0s
+...
+
+# run the image hash from the previous step to start a shell in the container
+$ docker run -it <somehashabc>
+\#
+
+# run tests in the cmd package
+\# go test ./cmd
+ok      github.com/Aerilate/htn-backend/cmd     0.010s
+
+# display the app help message
+\# ./app --help
+Serves information on HtN users
+
+Usage:
+  app [flags]
+  app [command]
+
+Available Commands:
+  help        Help about any command
+  migrate     Run data migrations on the database
+  populate    Populates the database with data from an input file
+  serve       Starts the server
+
+Flags:
+  -h, --help   help for app
+
+Use "app [command] --help" for more information about a command.
+
+# you wouldn't need to run any of these subcommands because the docker compose file will handle it for you
+#   but you could technically run `./app migrate` or `./app populate` yourself here
+
+# exit out the container. the container will stop
+\# exit
 ```

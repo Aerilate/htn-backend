@@ -5,13 +5,13 @@ import (
 )
 
 type Repo struct {
-	UserRepo
-	SkillRatingRepo
+	userRepo
+	skillRatingRepo
 }
 
 func NewRepo(db *gorm.DB) Repo {
 	return Repo{
-		NewUserRepo(db),
-		NewSkillRatingRepo(db),
+		newUserRepo(db),
+		newSkillRatingRepo(db),
 	}
 }

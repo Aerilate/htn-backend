@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// running the app without a subcommand just displays the help message
 var rootCmd = &cobra.Command{
 	Use:   "app",
 	Short: "Serves information on HtN users",

@@ -38,6 +38,7 @@ var populateCmd = &cobra.Command{
 	},
 }
 
+// populate loads data from an inputFile, processes it, and writes the processed data to a SQLite file
 func populate(inputFile string, sqlFile string) error {
 	var users []model.User
 	users, err := processUsersJSON(inputFile)
@@ -45,10 +46,12 @@ func populate(inputFile string, sqlFile string) error {
 		return err
 	}
 
+	// set up the ORM
 	conn, err := gorm.Open(sqlite.Open(sqlFile), &gorm.Config{})
 	if err != nil {
 		return err
 	}
+	// initialize our repository struct to interact with the DB
 	newDB := repository.NewRepo(conn)
 	if err := newDB.InsertUsers(users); err != nil {
 		return err
@@ -56,6 +59,7 @@ func populate(inputFile string, sqlFile string) error {
 	return nil
 }
 
+// processUsersJSON unmarshalls the data from a given inputFile into a User struct
 func processUsersJSON(inputFile string) ([]model.User, error) {
 	data, err := os.ReadFile(inputFile)
 	if err != nil {

@@ -7,15 +7,18 @@ import (
 
 const MaxInt = int(^uint(0) >> 1)
 
-type SkillRatingRepo struct {
+type skillRatingRepo struct {
 	*gorm.DB
 }
 
-func NewSkillRatingRepo(db *gorm.DB) SkillRatingRepo {
-	return SkillRatingRepo{DB: db}
+func newSkillRatingRepo(db *gorm.DB) skillRatingRepo {
+	return skillRatingRepo{DB: db}
 }
 
-func (s SkillRatingRepo) AggregateSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error) {
+// AggregateSkills returns a list of skills that have users between minFreq and maxFreq
+// To omit a bound, pass in nil
+func (s skillRatingRepo) AggregateSkills(minFreq *int, maxFreq *int) ([]model.SkillAggregate, error) {
+	// if not specified, give default values to minFreq and maxFreq
 	if minFreq == nil {
 		minFreq = intPtr(0)
 	}

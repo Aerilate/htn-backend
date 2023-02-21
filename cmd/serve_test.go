@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHealthRoute(t *testing.T) {
+func TestPingRoute(t *testing.T) {
 	server := NewServer(repository.NewRepo(nil))
 
 	w := httptest.NewRecorder()
