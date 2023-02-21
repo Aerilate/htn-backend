@@ -79,6 +79,7 @@ func (s Server) getUsers() gin.HandlerFunc {
 		users, err := s.repo.GetAllUsers()
 		if err != nil {
 			c.Status(http.StatusNotFound)
+			return
 		}
 		c.JSON(http.StatusOK, users)
 	}
@@ -88,11 +89,13 @@ func (s Server) getOneUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.Status(http.StatusNotFound)
+			c.Status(http.StatusBadRequest)
+			return
 		}
 		user, err := s.repo.GetUser(id)
 		if err != nil {
 			c.Status(http.StatusNotFound)
+			return
 		}
 		c.JSON(http.StatusOK, user)
 	}
@@ -104,18 +107,22 @@ func (s Server) updateUser() gin.HandlerFunc {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.Status(http.StatusBadRequest)
+			return
 		}
 
 		data, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
 			c.Status(http.StatusBadRequest)
+			return
 		}
 		var updatedInfo model.User
 		if err := json.Unmarshal(data, &updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
+			return
 		}
 		if err := s.repo.UpdateUser(id, updatedInfo); err != nil {
 			c.Status(http.StatusBadRequest)
+			return
 		}
 		c.Status(http.StatusOK)
 	}
@@ -131,18 +138,21 @@ func (s Server) getSkills() gin.HandlerFunc {
 
 		if minFreqParam, ok := c.GetQuery("min_frequency"); ok {
 			if minFreq, err = strConv(minFreqParam); err != nil {
-				c.Status(http.StatusNotFound)
+				c.Status(http.StatusBadRequest)
+				return
 			}
 		}
 		if maxFreqParam, ok := c.GetQuery("max_frequency"); ok {
 			if maxFreq, err = strConv(maxFreqParam); err != nil {
-				c.Status(http.StatusNotFound)
+				c.Status(http.StatusBadRequest)
+				return
 			}
 		}
 
 		skills, err := s.repo.AggregateSkills(minFreq, maxFreq)
 		if err != nil {
 			c.Status(http.StatusNotFound)
+			return
 		}
 		c.JSON(http.StatusOK, skills)
 	}
