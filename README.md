@@ -2,6 +2,18 @@
 Submission for the Hack the North 2023 Backend Challenge.
 
 
+## Table of Contentx
+* [Overview](#overview)
+* [Project Structure](#project-structure)
+* [Setup and Installation](#setup-and-installation)
+    * [GET /users/](#get-users)
+    * [GET /users/\<id\>](#get-usersid)
+    * [PUT /users/\<id\>](#put-usersid)
+    * [GET /skills/](#get-skills)
+* [API](#api)
+* [Running Tests](#running-tests)
+
+
 ## Overview
 This Go project compiles to a single binary that is capable of:
 1. running migration scripts on a SQLite database
@@ -27,11 +39,14 @@ The main libraries used are:
 Requirements:
 * Git
 * Docker
+
 Note: Go is not required for setup and this guide does NOT assume you have it installed.
 
 ### Clone
 ```bash
 $ git clone git@github.com:Aerilate/htn-backend.git
+
+$ cd htn-backend
 ```
 
 ### Basic Usage
@@ -77,7 +92,7 @@ $ curl localhost:8080/users/
 ...
 ```
 
-### GET /users/<id>
+### GET /users/\<id\>
 Retrieve information on the user with the given id.
 
 #### Return
@@ -105,7 +120,7 @@ $ curl localhost:8080/users/1
 {"name":"Breanna Dillon","company":"Jackson Ltd","email":"lorettabrown@example.net","phone":"+1-924-116-7963","skills":[{"skill":"OpenCV","rating":1},{"skill":"Swift","rating":4}]}
 ```
 
-## PUT /users/<id>
+## PUT /users/\<id\>
 Update some information about a user.
 
 #### Body
@@ -139,17 +154,15 @@ $ curl localhost:8080/users/1
 {"name":"Breanna Dillon","company":"Jackson Ltd","email":"lorettabrown@example.net","phone":"+1-924-116-7963","skills":[{"skill":"OpenCV","rating":1},{"skill":"Swift","rating":4}]}
 
 # update some fields
-$ curl -X PUT -H "Content-Type: application/json" -d '{"company":"", "email":"asdf@example.net", "phone":"123"}' localhost:8080/users/1
-
-# get updated user information
-$ curl localhost:8080/users/1
+$ curl -X PUT -H "Content-Type: application/json" -d \
+        '{"company":"", "email":"asdf@example.net", "phone":"123"}' \
+        localhost:8080/users/1
 {"name":"Breanna Dillon","company":"","email":"asdf@example.net","phone":"123","skills":[{"skill":"OpenCV","rating":1},{"skill":"Swift","rating":4}]}
 
 # now let's also update some skills
-$ curl -X PUT -H "Content-Type: application/json" -d '{"email":"lorettabrown@example.net","skills":[{"skill":"OpenCV","rating":5},{"skill":"Python","rating":3}]}' localhost:8080/users/1
-
-# get updated user information
-$ curl localhost:8080/users/1
+$ curl -X PUT -H "Content-Type: application/json" -d \
+        '{"email":"lorettabrown@example.net","skills":[{"skill":"OpenCV","rating":5},{"skill":"Python","rating":3}]}' \
+        localhost:8080/users/1
 {"name":"Breanna Dillon","company":"","email":"lorettabrown@example.net","phone":"123","skills":[{"skill":"OpenCV","rating":5},{"skill":"Python","rating":3}]}
 ```
 
@@ -174,7 +187,7 @@ Retrieve aggregate information on user skills.
 ]
 ```
 
-### Example
+#### Example
 ```bash
 $ curl "localhost:8080/skills/"
 [{"skill":"Sanic","count":43},{"skill":"React","count":41},{"skill":"Plotly","count":39}, ...
@@ -186,7 +199,7 @@ $ curl "localhost:8080/skills/?min_frequency=19&max_frequency=21"
 [{"skill":"Matplotlib","count":21},{"skill":"Aurelia","count":21},{"skill":"Starlette","count":20},{"skill":"Pascal","count":20},{"skill":"Numpy","count":20},{"skill":"Lisp","count":20},{"skill":"Tachyons","count":19}]
 ```
 
-### Running Tests
+## Running Tests
 ```bash
 # make sure to stop previous containers (i.e. CTRL+C out of docker compose up)
 
