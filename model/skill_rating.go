@@ -7,6 +7,6 @@ type SkillRating struct {
 }
 
 type SkillAggregate struct {
-	Skill string
-	Count int
+	Skill string `json:"skill"`
+	Count int    `json:"count"`
 }

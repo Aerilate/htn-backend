@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"reflect"
+
 	"github.com/Aerilate/htn-backend/model"
 	"github.com/imdario/mergo"
 	"gorm.io/gorm"
@@ -48,19 +50,21 @@ func (u UserRepo) UpdateUser(id int, updatedInfo model.User) error {
 	if err := u.First(&userToUpdate, id).Error; err != nil {
 		return err
 	}
-	if err := mergo.Merge(&userToUpdate, updatedInfo, mergo.WithOverride); err != nil {
+	if err := mergo.Merge(
+		&userToUpdate,
+		updatedInfo,
+		mergo.WithTransformers(userTransformer{})); err != nil {
 		return err
 	}
 	if err := u.Save(&userToUpdate).Error; err != nil {
 		return err
 	}
 
-	// update skills
 	if updatedInfo.SkillRating == nil {
 		return nil
-	} else if len(updatedInfo.SkillRating) == 0 {
-		u.Where("user_id = ?", id).Delete(&model.SkillRating{})
-		return nil
+	}
+	if err := u.Where("user_id = ?", id).Delete(&model.SkillRating{}).Error; err != nil {
+		return err
 	}
 	if err := u.Model(&userToUpdate).
 		Association("SkillRating").
@@ -68,4 +72,19 @@ func (u UserRepo) UpdateUser(id int, updatedInfo model.User) error {
 		return err
 	}
 	return nil
+}
+
+type userTransformer struct{}
+
+func (u userTransformer) Transformer(typ reflect.Type) func(dst, src reflect.Value) error {
+	var s string
+	if typ != reflect.TypeOf(&s) {
+		return nil
+	}
+	return func(dst, src reflect.Value) error {
+		if dst.CanSet() && src.UnsafePointer() != nil {
+			dst.Set(src)
+		}
+		return nil
+	}
 }

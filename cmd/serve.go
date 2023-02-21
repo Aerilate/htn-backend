@@ -68,7 +68,7 @@ func (s Server) registerRoutes() {
 		c.String(http.StatusOK, "pong")
 	})
 
-	s.GET("/users", s.getUsers())
+	s.GET("/users/", s.getUsers())
 	s.GET("/users/:id", s.getOneUser())
 	s.PUT("/users/:id", s.updateUser())
 	s.GET("/skills/", s.getSkills())
