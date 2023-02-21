@@ -200,23 +200,28 @@ $ curl "localhost:8080/skills/?min_frequency=19&max_frequency=21"
 ```
 
 ## Running Tests
+Before starting, make sure to stop previous containers (i.e. CTRL+C out of docker compose up).
 ```bash
-# make sure to stop previous containers (i.e. CTRL+C out of docker compose up)
-
 # this builds the first stage only and will be our dev container. expect some build output
 $ docker build . --target builder
 ...
 => => writing image sha256:<somehashabc>       0.0s
 ...
+```
 
+```bash
 # run the image hash from the previous step to start a shell in the container
 $ docker run -it <somehashabc>
 \#
+```
 
+```bash
 # run tests in the cmd package
 \# go test ./cmd
 ok      github.com/Aerilate/htn-backend/cmd     0.010s
+```
 
+```bash
 # display the app help message
 \# ./app --help
 Serves information on HtN users
@@ -238,7 +243,10 @@ Use "app [command] --help" for more information about a command.
 
 # you wouldn't need to run any of these subcommands because the docker compose file will handle it for you
 #   but you could technically run `./app migrate` or `./app populate` yourself here
+```
 
+```bash
 # exit out the container. the container will stop
 \# exit
+$
 ```
