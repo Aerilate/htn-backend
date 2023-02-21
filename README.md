@@ -6,11 +6,11 @@ Submission for the Hack the North 2023 Backend Challenge.
 * [Overview](#overview)
 * [Project Structure](#project-structure)
 * [Setup and Installation](#setup-and-installation)
+* [API](#api)
     * [GET /users/](#get-users)
     * [GET /users/\<id\>](#get-usersid)
     * [PUT /users/\<id\>](#put-usersid)
     * [GET /skills/](#get-skills)
-* [API](#api)
 * [Running Tests](#running-tests)
 
 
