@@ -133,7 +133,12 @@ func (s Server) updateUser() gin.HandlerFunc {
 			c.Status(http.StatusBadRequest)
 			return
 		}
-		c.Status(http.StatusOK)
+		user, err := s.repo.GetUser(id)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.JSON(http.StatusOK, user)
 	}
 }
 
